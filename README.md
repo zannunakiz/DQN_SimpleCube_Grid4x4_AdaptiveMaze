@@ -1,141 +1,141 @@
-# SKRPSI_CUBE
+# ADAPTIVE CUBE MAZE
 
-🎯 **SKRPSI_CUBE** adalah proyek edukatif berbasis Python yang menampilkan simulasi **Deep Q-Network (DQN)** pada lingkungan **GridWorld 4x4**. Repository ini juga dilengkapi dengan tool ilustrasi visual untuk membantu mendesain dan memahami representasi grid secara manual.
+🎯 **SKRPSI_CUBE** is an educational Python project that demonstrates a **Deep Q-Network (DQN)** agent inside a **4x4 GridWorld** environment. The repository also includes a lightweight visual editor to help design and inspect grid layouts manually.
 
-## ✨ Gambaran Umum
+## ✨ Overview
 
-Proyek ini berfokus pada dua alur utama:
+This project revolves around two main entry points:
 
-- **`main.py`** untuk menjalankan training agent DQN pada GridWorld.
-- **`illustrate.py`** untuk membuka editor grid 4x4 interaktif berbasis Pygame.
+- **`main.py`** for running DQN training and visualizing agent behavior.
+- **`illustrate.py`** for opening an interactive 4x4 grid editor built with Pygame.
 
-Pendekatan yang digunakan sengaja dibuat ringkas dan mudah dibaca, sehingga cocok untuk:
+The codebase is intentionally compact and readable, making it a good fit for:
 
-- demonstrasi konsep reinforcement learning,
-- eksperimen awal untuk skripsi atau pembelajaran,
-- visualisasi perilaku agent pada lingkungan kecil yang terkontrol.
+- reinforcement learning demonstrations,
+- thesis prototypes and early-stage experimentation,
+- small controlled GridWorld studies with visual feedback.
 
-## 🧠 Fitur Utama
+## 🧠 Key Features
 
-- Start dan goal berada di posisi tetap.
-- Hole diacak pada setiap episode, tetapi tetap divalidasi agar masih tersedia jalur menuju goal.
-- State agent hanya memakai 4 neuron lokal: `atas`, `bawah`, `kiri`, `kanan`.
-- Agent menggunakan arsitektur DQN fully connected yang sederhana.
-- Training dapat ditampilkan secara real-time melalui GUI Pygame.
-- Editor grid manual tersedia untuk membantu ilustrasi skenario warna pada board.
+- Fixed start and goal positions.
+- Random holes generated every episode, with path validation to guarantee at least one valid route to the goal.
+- A compact 4-neuron local state representation: `up`, `down`, `left`, `right`.
+- A simple fully connected DQN architecture.
+- Optional real-time visualization through Pygame.
+- A manual grid illustrator for creating and previewing board layouts.
 
-## 🗂️ Struktur Codebase
+## 🗂️ Codebase Structure
 
 - **`main.py`**  
-  Menyediakan implementasi lingkungan GridWorld, replay buffer, network DQN, agent, proses training, dan CLI argument parser.
+  Contains the GridWorld environment, replay buffer, DQN network, agent logic, training loop, and CLI argument parsing.
 
 - **`illustrate.py`**  
-  Tool visual untuk mewarnai grid 4x4 secara manual menggunakan mouse dan shortcut keyboard.
+  Provides an interactive 4x4 coloring tool for manually sketching grid scenarios with mouse input and keyboard shortcuts.
 
 - **`requirements.txt`**  
-  Daftar dependency utama yang dibutuhkan untuk menjalankan proyek.
+  Lists the core dependencies required to run the project.
 
-## ⚙️ Kebutuhan Sistem
+## ⚙️ Requirements
 
-- Python 3.10 atau lebih baru direkomendasikan
-- `pip` untuk instalasi package
-- Lingkungan desktop dengan dukungan tampilan grafis untuk Pygame
+- Python 3.10 or newer is recommended
+- `pip` for dependency installation
+- A desktop environment capable of opening Pygame windows
 
-## 📦 Instalasi
+## 📦 Installation
 
 ```bash
-# Clone repository
-git clone <url-repository>
+# Clone the repository
+git clone <repository-url>
 cd SKRPSI_CUBE
 
-# (Opsional) buat virtual environment
+# Optional: create a virtual environment
 python -m venv .venv
 
-# Aktifkan virtual environment di Windows PowerShell
+# Activate it in Windows PowerShell
 .venv\Scripts\Activate.ps1
 
-# Install semua dependency utama
+# Install project dependencies
 pip install -r requirements.txt
 ```
 
-## ▶️ Menjalankan Simulasi DQN
+## ▶️ Running the DQN Simulation
 
-Gunakan file `main.py` untuk training agent dan visualisasi hasilnya.
+Use `main.py` to train the agent and optionally display the GridWorld window.
 
 ```bash
-# Jalankan training dengan pengaturan default dan GUI aktif
+# Run training with default settings and GUI enabled
 python main.py
 
-# Jalankan training selama 300 episode
+# Train for 300 episodes
 python main.py --episodes 300
 
-# Batasi maksimal 25 langkah per episode
+# Limit each episode to 25 steps
 python main.py --episodes 300 --max-steps 25
 
-# Render GUI setiap 3 langkah agar tampilan lebih ringan
+# Render every 3 steps to reduce GUI update frequency
 python main.py --render-every 3 --fps 10
 
-# Jalankan training tanpa membuka GUI
+# Run training without opening the GUI
 python main.py --no-render
 
-# Tampilkan seluruh opsi CLI yang tersedia
+# Show all available CLI options
 python main.py --help
 ```
 
-### Opsi CLI `main.py`
+### CLI Options in `main.py`
 
-- `--episodes` : jumlah episode training yang akan dijalankan.
-- `--max-steps` : batas maksimal langkah dalam satu episode.
-- `--render-every` : interval render GUI per sejumlah step.
-- `--fps` : batas frame rate untuk animasi Pygame.
-- `--seed` : seed random agar eksperimen dapat direproduksi.
-- `--no-render` : menonaktifkan GUI dan menjalankan training di terminal saja.
+- `--episodes` : number of training episodes to run.
+- `--max-steps` : maximum number of steps allowed per episode.
+- `--render-every` : render interval in steps when GUI mode is enabled.
+- `--fps` : maximum frame rate for the Pygame renderer.
+- `--seed` : random seed for reproducible experiments.
+- `--no-render` : disable the GUI and run training in terminal-only mode.
 
-## 🎨 Menjalankan Grid Illustrator
+## 🎨 Running the Grid Illustrator
 
-Gunakan file `illustrate.py` untuk membuat ilustrasi warna grid secara manual.
+Use `illustrate.py` to create a manual visual representation of a 4x4 grid.
 
 ```bash
-# Buka editor grid 4x4 interaktif
+# Open the interactive 4x4 grid editor
 python illustrate.py
 ```
 
-### Kontrol di `illustrate.py`
+### Controls in `illustrate.py`
 
-- Klik tombol warna di panel kanan, lalu klik sel pada grid.
-- Tekan `1` untuk putih.
-- Tekan `2` untuk kuning.
-- Tekan `3` untuk biru.
-- Tekan `4` untuk merah.
-- Tekan `5` untuk hijau.
-- Tekan `C` untuk membersihkan seluruh grid.
-- Tekan `S` untuk mencetak matriks warna ke terminal.
-- Tekan `Esc` untuk keluar dari aplikasi.
+- Click a color button in the right panel, then click a cell on the grid.
+- Press `1` for white.
+- Press `2` for yellow.
+- Press `3` for blue.
+- Press `4` for red.
+- Press `5` for green.
+- Press `C` to clear the grid.
+- Press `S` to print the current color matrix to the terminal.
+- Press `Esc` to close the application.
 
-## 🔬 Representasi State dan Reward
+## 🔬 State Representation and Rewards
 
-Pada `main.py`, state agent direpresentasikan sebagai:
+In `main.py`, the agent state is represented as:
 
 ```text
-[atas, bawah, kiri, kanan]
+[up, down, left, right]
 ```
 
-Makna nilai setiap sensor:
+Sensor value meanings:
 
-- `1` = sel putih / clear
-- `2` = sel kuning / pernah dikunjungi
-- `3` = sel merah / hole
-- `4` = wall / di luar batas grid
-- `5` = sel hijau / goal
+- `1` = white / clear cell
+- `2` = yellow / previously visited cell
+- `3` = red / hole
+- `4` = wall / out of bounds
+- `5` = green / goal
 
-Mapping aksi agent:
+Action mapping:
 
-- `0` = kiri
-- `1` = kanan
-- `2` = atas
-- `3` = bawah
+- `0` = left
+- `1` = right
+- `2` = up
+- `3` = down
 
-Reward default:
+Default rewards:
 
 - `clear` = `+1`
 - `yellow` = `-3`
@@ -143,20 +143,20 @@ Reward default:
 - `hole` = `-5`
 - `goal` = `+20`
 
-## 🔄 Alur Training Singkat
+## 🔄 Training Flow
 
-1. Environment di-reset dan hole acak dihasilkan.
-2. Agent memilih aksi menggunakan strategi epsilon-greedy.
-3. Transisi disimpan ke replay buffer.
-4. Online network belajar dari batch pengalaman.
-5. Target network diperbarui secara berkala.
-6. Reward episode dicetak ke terminal sebagai log training.
+1. The environment resets and generates a valid random hole layout.
+2. The agent selects actions using an epsilon-greedy policy.
+3. Transitions are stored inside the replay buffer.
+4. The online network learns from sampled experience batches.
+5. The target network is updated periodically.
+6. Episode logs are printed to the terminal during training.
 
-## 📝 Catatan Penggunaan
+## 📝 Notes
 
-- Proyek ini dirancang terutama untuk kebutuhan edukasi dan eksperimen kecil.
-- Jika jendela Pygame ditutup saat training berjalan, proses akan dihentikan dengan aman.
-- Karena grid berukuran kecil, fokus utama proyek ini adalah keterbacaan logika, bukan kompleksitas lingkungan.
+- This project is designed primarily for education and small-scale experimentation.
+- If the Pygame window is closed during training, the program exits safely.
+- Because the grid is intentionally small, the main focus is readability and experiment clarity rather than environment complexity.
 
 ## 👏 Credits
 

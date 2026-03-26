@@ -1,12 +1,12 @@
 """
-Implementasi edukatif Deep Q-Network (DQN) untuk GridWorld 4x4.
+Educational Deep Q-Network (DQN) implementation for a 4x4 GridWorld.
 
-Karakteristik utama:
-- Titik start dan goal selalu tetap.
-- Hole diacak setiap episode sesuai `hole_count` dan selalu divalidasi.
-- State agent hanya terdiri dari 4 neuron lokal: [atas, bawah, kiri, kanan].
-- Aksi agent bersifat diskret: kiri, kanan, atas, dan bawah.
-- Reward dibedakan untuk sel baru, sel terkunjungi, tembok, hole, dan goal.
+Core characteristics:
+- Fixed start and goal positions.
+- Random holes generated each episode based on `hole_count`, with route validation.
+- A compact 4-neuron local state: [up, down, left, right].
+- Four discrete actions: left, right, up, and down.
+- Separate rewards for new cells, revisited cells, walls, holes, and the goal.
 """
 
 from __future__ import annotations
@@ -29,30 +29,30 @@ import torch.optim as optim
 
 class GridWorldEnv:
     """
-    Grid 4x4 dengan start/goal tetap.
+    4x4 GridWorld with fixed start and goal positions.
 
     Coordinate system:
-    - (0, 0) = kiri atas
-    - x bertambah ke kanan
-    - y bertambah ke bawah
+    - (0, 0) = top-left
+    - x increases to the right
+    - y increases downward
     """
 
-    # Urutan aksi yang dipakai agent dan log training.
-    # 0 = kiri, 1 = kanan, 2 = atas, 3 = bawah
+    # Action order used by the agent and training logs.
+    # 0 = left, 1 = right, 2 = up, 3 = down
     ACTIONS = {
-        0: (-1, 0),  # kiri
-        1: (1, 0),   # kanan
-        2: (0, -1),  # atas
-        3: (0, 1),   # bawah
+        0: (-1, 0),  # left
+        1: (1, 0),   # right
+        2: (0, -1),  # up
+        3: (0, 1),   # down
     }
 
-    # Urutan sensor lokal untuk 4 input neuron:
-    # [atas, bawah, kiri, kanan]
+    # Local sensor order for the 4-neuron input:
+    # [up, down, left, right]
     SENSOR_DIRS = [
-        (0, -1),  # atas
-        (0, 1),   # bawah
-        (-1, 0),  # kiri
-        (1, 0),   # kanan
+        (0, -1),  # up
+        (0, 1),   # down
+        (-1, 0),  # left
+        (1, 0),   # right
     ]
 
     def __init__(
@@ -77,14 +77,14 @@ class GridWorldEnv:
         self.hole_count = hole_count
         self.max_steps = max_steps
 
-        # Konfigurasi reward per jenis hasil langkah.
+        # Reward configuration for each step outcome.
         self.reward_clear = reward_clear
         self.reward_yellow = reward_yellow
         self.reward_wall = reward_wall
         self.reward_hole = reward_hole
         self.reward_goal = reward_goal
 
-        # Konfigurasi rendering Pygame.
+        # Pygame rendering configuration.
         self.cell_size = cell_size
         self.margin = margin
         self.info_height = info_height
@@ -100,7 +100,7 @@ class GridWorldEnv:
 
     @property
     def state_size(self) -> int:
-        # Hanya 4 neuron input lokal: atas, bawah, kiri, kanan.
+        # The state only contains 4 local input neurons: up, down, left, right.
         return 4
 
     @property
@@ -118,7 +118,7 @@ class GridWorldEnv:
         goal: Tuple[int, int],
         blocked: Set[Tuple[int, int]],
     ) -> bool:
-        # Gunakan BFS sederhana untuk memastikan masih ada rute start -> goal.
+        # Use a simple BFS to ensure there is still a valid route from start to goal.
         queue: Deque[Tuple[int, int]] = deque([start])
         visited = {start}
 
@@ -143,7 +143,7 @@ class GridWorldEnv:
 
     def _generate_valid_holes(self) -> List[Tuple[int, int]]:
         """
-        Buat layout hole acak yang tetap menyisakan jalur valid ke goal.
+        Generate random hole positions while preserving a valid path to the goal.
         """
         candidates = [
             (x, y)
@@ -152,22 +152,22 @@ class GridWorldEnv:
             if (x, y) != self.start_pos and (x, y) != self.goal_pos
         ]
 
-        # Ulangi sampling sampai menemukan kombinasi yang valid.
-        # Untuk grid kecil seperti ini prosesnya biasanya sangat cepat.
+        # Repeat random sampling until a valid layout is found.
+        # This is usually very fast on a 4x4 grid.
         for _ in range(2000):
             holes = random.sample(candidates, self.hole_count)
             blocked = set(holes)
             if self._has_possible_route(self.start_pos, self.goal_pos, blocked):
                 return holes
 
-        # Fallback deterministik bila sampling acak belum menemukan hasil.
+        # Deterministic fallback in case random sampling does not find a layout.
         for comb in itertools.combinations(candidates, self.hole_count):
             blocked = set(comb)
             if self._has_possible_route(self.start_pos, self.goal_pos, blocked):
                 return list(comb)
 
-        # Hampir tidak mungkin terjadi pada grid 4x4, tetapi tetap dijaga.
-        raise RuntimeError("Tidak ditemukan layout hole valid dengan possible route.")
+        # Extremely unlikely on a 4x4 grid, but kept as a safe guardrail.
+        raise RuntimeError("Could not find a valid hole layout with a remaining path.")
 
     def reset(self) -> np.ndarray:
         self.agent_pos = self.start_pos
@@ -178,14 +178,15 @@ class GridWorldEnv:
 
     def _get_state_vector(self) -> np.ndarray:
         """
-        State 4-neuron:
-        [atas, bawah, kiri, kanan]
-        Value:
-        - 1: putih (clear)
-        - 2: kuning (visited)
-        - 3: merah (hole)
+        4-neuron state:
+        [up, down, left, right]
+
+        Values:
+        - 1: white (clear)
+        - 2: yellow (visited)
+        - 3: red (hole)
         - 4: wall (out of bounds)
-        - 5: hijau (goal)
+        - 5: green (goal)
         """
         ax, ay = self.agent_pos
         values: List[float] = []
@@ -213,22 +214,22 @@ class GridWorldEnv:
         x, y = self.agent_pos
         nx, ny = x + dx, y + dy
 
-        # 1. Menabrak tembok -> penalti + terminal.
+        # 1. Hitting a wall -> penalty + terminal.
         if not self._in_bounds(nx, ny):
             return self._get_state_vector(), self.reward_wall, True, {"result": "wall"}
 
-        # Pindahkan agent bila langkah masih valid.
+        # Move the agent when the step stays inside the grid.
         self.agent_pos = (nx, ny)
 
-        # 2. Masuk hole -> penalti + terminal.
+        # 2. Falling into a hole -> penalty + terminal.
         if self.agent_pos in self.holes:
             return self._get_state_vector(), self.reward_hole, True, {"result": "hole"}
 
-        # 3. Mencapai goal -> reward positif + terminal.
+        # 3. Reaching the goal -> positive reward + terminal.
         if self.agent_pos == self.goal_pos:
             return self._get_state_vector(), self.reward_goal, True, {"result": "goal"}
 
-        # 4. Masuk sel kosong atau sel yang pernah dikunjungi -> lanjut episode.
+        # 4. Moving to a fresh or revisited cell -> continue the episode.
         done = False
         if self.agent_pos in self.visited_cells:
             result = "yellow"
@@ -239,7 +240,7 @@ class GridWorldEnv:
 
         self.visited_cells.add(self.agent_pos)
 
-        # Hentikan episode jika batas langkah tercapai.
+        # Stop the episode once the maximum step budget is reached.
         if self.steps >= self.max_steps:
             done = True
             result = "max_steps"
@@ -267,25 +268,25 @@ class GridWorldEnv:
                     self.cell_size,
                 )
 
-                # Warna default untuk sel kosong.
+                # Default color for an empty cell.
                 color = (250, 250, 250)
 
                 if (x, y) == self.goal_pos:
-                    color = (50, 182, 79)  # goal hijau
+                    color = (50, 182, 79)  # green goal
                 elif (x, y) in hole_set:
-                    color = (220, 70, 60)  # hole merah
+                    color = (220, 70, 60)  # red hole
                 elif (x, y) in self.visited_cells:
-                    color = (242, 210, 72)  # jalur yang pernah dilalui = kuning
+                    color = (242, 210, 72)  # previously visited path = yellow
 
                 if (x, y) == self.agent_pos:
-                    color = (65, 106, 230)  # agent biru
+                    color = (65, 106, 230)  # blue agent
 
                 pygame.draw.rect(screen, color, rect)
                 pygame.draw.rect(screen, (72, 72, 72), rect, 2)
 
         info_top = self.margin * 2 + self.grid_size * self.cell_size
         lines = [
-            "State input: [atas, bawah, kiri, kanan] -> 1 putih, 2 kuning, 3 merah, 4 wall, 5 hijau",
+            "State input: [up, down, left, right] -> 1 white, 2 yellow, 3 red, 4 wall, 5 green",
             f"Episode: {episode}",
             f"Total reward: {total_reward:.1f}",
             f"Epsilon: {epsilon:.3f}",
@@ -320,10 +321,10 @@ class ReplayBuffer:
 
 class DQNNetwork(nn.Module):
     """
-    Fully connected network tanpa CNN.
+    Fully connected network without a CNN.
 
-    Input  : 4 neuron state lokal.
-    Output : 4 Q-values untuk kiri, kanan, atas, dan bawah.
+    Input  : 4-neuron local state.
+    Output : 4 Q-values for left, right, up, and down.
     """
 
     def __init__(self, state_size: int, action_size: int) -> None:
@@ -398,10 +399,10 @@ class DQNAgent:
         next_states_t = torch.tensor(next_states, dtype=torch.float32, device=self.device)
         dones_t = torch.tensor(dones, dtype=torch.float32, device=self.device)
 
-        # Estimasi Q(s, a) saat ini dari online network.
+        # Current Q(s, a) estimate from the online network.
         current_q = self.online_net(states_t).gather(1, actions_t).squeeze(1)
 
-        # Hitung Bellman target menggunakan target network.
+        # Compute the Bellman target with the target network.
         with torch.no_grad():
             next_q = self.target_net(next_states_t).max(dim=1).values
             target_q = rewards_t + self.gamma * next_q * (1.0 - dones_t)
@@ -514,9 +515,9 @@ def train_dqn(
             last_result = info["result"]
             global_step += 1
 
-            # Render sinkron:
-            # - setiap N step (`render_every`)
-            # - selalu render saat terminal agar hasil episode terlihat di GUI
+            # Synchronized rendering:
+            # - every N steps (`render_every`)
+            # - always on terminal states so each episode is visible in the GUI
             render_now = render and ((global_step % render_every == 0) or done)
             maybe_render(
                 env=env,
@@ -556,42 +557,42 @@ def train_dqn(
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="DQN GridWorld edukasi dengan state lokal 4-neuron"
+        description="Educational DQN GridWorld with a 4-neuron local state"
     )
     parser.add_argument(
         "--episodes",
         type=int,
         default=400,
-        help="Jumlah episode training yang dijalankan",
+        help="Number of training episodes to run",
     )
     parser.add_argument(
         "--max-steps",
         type=int,
         default=20,
-        help="Maksimum langkah per episode",
+        help="Maximum number of steps per episode",
     )
     parser.add_argument(
         "--render-every",
         type=int,
         default=1,
-        help="Render setiap N step saat GUI aktif",
+        help="Render every N steps while the GUI is active",
     )
     parser.add_argument(
         "--fps",
         type=int,
         default=12,
-        help="Batas frame per second untuk renderer Pygame",
+        help="Maximum frame rate for the Pygame renderer",
     )
     parser.add_argument(
         "--seed",
         type=int,
         default=42,
-        help="Seed agar eksperimen dapat direproduksi",
+        help="Seed value for reproducible experiments",
     )
     parser.add_argument(
         "--no-render",
         action="store_true",
-        help="Jalankan training tanpa membuka jendela Pygame",
+        help="Run training without opening the Pygame window",
     )
     return parser.parse_args()
 
@@ -602,9 +603,9 @@ def main() -> None:
 
     env = GridWorldEnv(
         grid_size=4,
-        start_pos=(0, 3),   # posisi start tetap
-        goal_pos=(3, 0),    # posisi goal tetap
-        hole_count=2,       # dua hole acak setiap episode
+        start_pos=(0, 3),   # fixed start position
+        goal_pos=(3, 0),    # fixed goal position
+        hole_count=2,       # two random holes every episode
         max_steps=args.max_steps,
         reward_clear=1.0,
         reward_yellow=-3.0,
@@ -613,14 +614,14 @@ def main() -> None:
         reward_goal=20.0,
     )
 
-    print("Konfigurasi skenario:")
+    print("Scenario configuration:")
     print("- Grid         : 4x4")
-    print("- Start tetap  : (0, 3)")
-    print("- Goal tetap   : (3, 0)")
-    print("- Hole per eps : 2 (acak, tapi selalu ada possible route)")
+    print("- Fixed start  : (0, 3)")
+    print("- Fixed goal   : (3, 0)")
+    print("- Holes / eps  : 2 (random, but always keeps a valid route)")
     print(f"- Episodes     : {args.episodes}")
-    print("- State input  : [atas, bawah, kiri, kanan] -> 1(putih), 2(kuning), 3(merah), 4(wall), 5(hijau)")
-    print("- Aksi         : 0=kiri, 1=kanan, 2=atas, 3=bawah")
+    print("- State input  : [up, down, left, right] -> 1(white), 2(yellow), 3(red), 4(wall), 5(green)")
+    print("- Actions      : 0=left, 1=right, 2=up, 3=down")
     print("- Reward       : clear=+1, yellow=-3, wall=-10, hole=-5, goal=+20")
     print("")
 

@@ -115,14 +115,14 @@ def draw_ui(
         screen.blit(text, (rect.x + 12, rect.y + 16))
 
     lines = [
-        "Klik tombol warna,",
-        "lalu klik box di grid.",
+        "Click a color button,",
+        "then click a cell on the grid.",
         "",
-        "Shortcut:",
-        "1/2/3/4/5 pilih warna",
+        "Shortcuts:",
+        "1/2/3/4/5 select color",
         "C clear grid",
-        "S print matriks code",
-        "ESC keluar",
+        "S print color matrix",
+        "ESC exit",
     ]
 
     info_y = GRID_TOP + 390
