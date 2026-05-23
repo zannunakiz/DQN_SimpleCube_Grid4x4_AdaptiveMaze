@@ -1,13 +1,12 @@
-# ADAPTIVE CUBE MAZE
+# ADAPTIVE DQN GRID MAZE
 
-🎯 **SKRPSI_CUBE** is an educational Python project that demonstrates a **Deep Q-Network (DQN)** agent inside a **4x4 GridWorld** environment. The repository also includes a lightweight visual editor to help design and inspect grid layouts manually.
+🎯 **DQN GRID MAZE** is an educational Python project that demonstrates a **Deep Q-Network (DQN)** agent inside a **4x4 GridWorld** environment. The repository also includes a lightweight visual editor to help design and inspect grid layouts manually.
 
 ## ✨ Overview
 
-This project revolves around two main entry points:
-
+This project revolves around one main entry point:
 - **`main.py`** for running DQN training and visualizing agent behavior.
-- **`illustrate.py`** for opening an interactive 4x4 grid editor built with Pygame.
+
 
 The codebase is intentionally compact and readable, making it a good fit for:
 
@@ -22,15 +21,11 @@ The codebase is intentionally compact and readable, making it a good fit for:
 - A compact 4-neuron local state representation: `up`, `down`, `left`, `right`.
 - A simple fully connected DQN architecture.
 - Optional real-time visualization through Pygame.
-- A manual grid illustrator for creating and previewing board layouts.
 
 ## 🗂️ Codebase Structure
 
 - **`main.py`**  
   Contains the GridWorld environment, replay buffer, DQN network, agent logic, training loop, and CLI argument parsing.
-
-- **`illustrate.py`**  
-  Provides an interactive 4x4 coloring tool for manually sketching grid scenarios with mouse input and keyboard shortcuts.
 
 - **`requirements.txt`**  
   Lists the core dependencies required to run the project.
@@ -46,13 +41,7 @@ The codebase is intentionally compact and readable, making it a good fit for:
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd SKRPSI_CUBE
-
-# Optional: create a virtual environment
-python -m venv .venv
-
-# Activate it in Windows PowerShell
-.venv\Scripts\Activate.ps1
+cd <filepath>
 
 # Install project dependencies
 pip install -r requirements.txt
@@ -79,37 +68,7 @@ python main.py --no-render
 python main.py --help
 ```
 
-### CLI Options in `main.py`
-
-- `--episodes` : number of training episodes to run.
-- `--max-steps` : maximum number of steps allowed per episode.
-- `--render-every` : render interval in steps when GUI mode is enabled.
-- `--fps` : maximum frame rate for the Pygame renderer.
-- `--seed` : random seed for reproducible experiments.
-- `--no-render` : disable the GUI and run training in terminal-only mode.
-
-## 🎨 Running the Grid Illustrator
-
-Use `illustrate.py` to create a manual visual representation of a 4x4 grid.
-
-```bash
-# Open the interactive 4x4 grid editor
-python illustrate.py
-```
-
-### Controls in `illustrate.py`
-
-- Click a color button in the right panel, then click a cell on the grid.
-- Press `1` for white.
-- Press `2` for yellow.
-- Press `3` for blue.
-- Press `4` for red.
-- Press `5` for green.
-- Press `C` to clear the grid.
-- Press `S` to print the current color matrix to the terminal.
-- Press `Esc` to close the application.
-
-## 🔬 State Representation and Rewards
+### 🔬 State Representation and Rewards
 
 In `main.py`, the agent state is represented as:
 
