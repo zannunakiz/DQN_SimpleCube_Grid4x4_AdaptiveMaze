@@ -72,9 +72,6 @@ python main.py --episodes 300
 # Limit each episode to 25 steps
 python main.py --episodes 300 --max-steps 25
 
-# Render every 3 steps to reduce GUI update frequency
-python main.py --render-every 3 --fps 10
-
 # Run training without opening the GUI
 python main.py --no-render
 
